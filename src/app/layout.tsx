@@ -1,18 +1,23 @@
+
+
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "LifeOS",
-  description: "A personal operating system for everyday life.",
+  title: "Human.Next",
+  description:
+    "Self improvement and productivity app for personal growth and development.",
 };
-
-const themeScript = `
-  try {
-    const theme = localStorage.getItem('lifeos-theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.classList.toggle('dark', theme ? theme === 'dark' : prefersDark);
-  } catch {}
-`;
 
 export default function RootLayout({
   children,
@@ -20,11 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en">
+      <body
+        className={`${inter.variable} min-h-screen font-sans antialiased`}
+      >
+        <Toaster richColors position="top-right" />
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
+      </body>
     </html>
   );
 }
