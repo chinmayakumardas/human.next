@@ -41,7 +41,7 @@ navMain: [
     icon: <BrainIcon />,
     items: [
       { title: "Dashboard", url: "/mind" },
-      { title: "Books", url: "/mind/books" },
+      { title: "Books", url: "/mind/book" },
       { title: "Habits", url: "/mind/habits" },
     ],
   },
@@ -74,8 +74,8 @@ navMain: [
 ],
   single: [
     {
-      name: "Calendar",
-      url: "/calendar",
+      name: "Dashboard",
+      url: "/dashboard",
       icon: (
         <FrameIcon
         />
