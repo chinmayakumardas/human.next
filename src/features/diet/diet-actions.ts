@@ -10,10 +10,10 @@ import type {
   ShoppingItem,
 } from "./types";
 import {
-  DEFAULT_BUDGET_ITEMS,
-  DEFAULT_MEAL_PLAN,
-  DEFAULT_NUTRITION_GOALS,
-  DEFAULT_SHOPPING_LIST,
+  defaultBudgetItems,
+  defaultMealPlan,
+  defaultNutritionGoals,
+  defaultShoppingList,
 } from "./constants";
 
 async function getUserId() {
@@ -45,7 +45,7 @@ export async function getDietData(): Promise<DietData> {
   const nutritionGoals: NutritionGoal[] =
     goalsRes.data && goalsRes.data.length > 0
       ? goalsRes.data
-      : DEFAULT_NUTRITION_GOALS.map((g) => ({ ...g }));
+      : defaultNutritionGoals.map((g) => ({ ...g }));
 
   let mealPlan: Meal[];
   if (mealsRes.data && mealsRes.data.length > 0) {
@@ -60,18 +60,18 @@ export async function getDietData(): Promise<DietData> {
       foods: foodsByMeal[meal.id] ?? [],
     }));
   } else {
-    mealPlan = DEFAULT_MEAL_PLAN;
+    mealPlan = defaultMealPlan;
   }
 
   const shoppingList: ShoppingItem[] =
     shoppingRes.data && shoppingRes.data.length > 0
       ? shoppingRes.data
-      : DEFAULT_SHOPPING_LIST.map((s) => ({ ...s }));
+      : defaultShoppingList.map((s) => ({ ...s }));
 
   const budgetItems: BudgetItem[] =
     budgetRes.data && budgetRes.data.length > 0
       ? budgetRes.data
-      : DEFAULT_BUDGET_ITEMS.map((b) => ({ ...b }));
+      : defaultBudgetItems.map((b) => ({ ...b }));
 
   return { nutritionGoals, mealPlan, shoppingList, budgetItems };
 }
@@ -80,11 +80,11 @@ export async function seedDietData() {
   const { supabase, userId } = await getUserId();
 
   await supabase.from("nutrition_goals").insert(
-    DEFAULT_NUTRITION_GOALS.map((g) => ({ ...g, user_id: userId }))
+    defaultNutritionGoals.map((g) => ({ ...g, user_id: userId }))
   );
 
   await supabase.from("meals").insert(
-    DEFAULT_MEAL_PLAN.map((m) => ({
+    defaultMealPlan.map((m) => ({
       id: m.id,
       user_id: userId,
       title: m.title,
@@ -93,7 +93,7 @@ export async function seedDietData() {
     }))
   );
 
-  const foods = DEFAULT_MEAL_PLAN.flatMap((m) =>
+  const foods = defaultMealPlan.flatMap((m) =>
     m.foods.map((f) => ({
       user_id: userId,
       meal_id: m.id,
@@ -108,12 +108,307 @@ export async function seedDietData() {
   await supabase.from("meal_foods").insert(foods);
 
   await supabase.from("shopping_list").insert(
-    DEFAULT_SHOPPING_LIST.map((s) => ({ ...s, user_id: userId }))
+    defaultShoppingList.map((s) => ({ ...s, user_id: userId }))
   );
 
   await supabase.from("budget_items").insert(
-    DEFAULT_BUDGET_ITEMS.map((b) => ({ ...b, user_id: userId }))
+    defaultBudgetItems.map((b) => ({ ...b, user_id: userId }))
   );
+
+  return { success: true };
+}
+
+
+
+export async function createMeal(input: {
+  title: string;
+  time: string;
+  sort_order?: number;
+}) {
+  const { supabase, userId } = await getUserId();
+
+  const { data, error } = await supabase
+    .from("meals")
+    .insert({
+      user_id: userId,
+      title: input.title,
+      time: input.time,
+      sort_order: input.sort_order ?? 0,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function deleteMeal(mealId: string) {
+  const { supabase, userId } = await getUserId();
+
+  // Delete foods first in case the database does not have
+  // ON DELETE CASCADE configured.
+  const { error: foodsError } = await supabase
+    .from("meal_foods")
+    .delete()
+    .eq("meal_id", mealId)
+    .eq("user_id", userId);
+
+  if (foodsError) {
+    throw new Error(foodsError.message);
+  }
+
+  const { error } = await supabase
+    .from("meals")
+    .delete()
+    .eq("id", mealId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return { success: true };
+}
+
+export async function addMealFood(
+  mealId: string,
+  input: {
+    name: string;
+    quantity: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+  }
+) {
+  const { supabase, userId } = await getUserId();
+
+  // Verify that the meal belongs to the current user.
+  const { data: meal, error: mealError } = await supabase
+    .from("meals")
+    .select("id")
+    .eq("id", mealId)
+    .eq("user_id", userId)
+    .single();
+
+  if (mealError || !meal) {
+    throw new Error("Meal not found");
+  }
+
+  const { data, error } = await supabase
+    .from("meal_foods")
+    .insert({
+      user_id: userId,
+      meal_id: mealId,
+      name: input.name,
+      quantity: input.quantity,
+      calories: input.calories,
+      protein: input.protein,
+      carbs: input.carbs,
+      fat: input.fat,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function deleteMealFood(foodId: string) {
+  const { supabase, userId } = await getUserId();
+
+  const { error } = await supabase
+    .from("meal_foods")
+    .delete()
+    .eq("id", foodId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return { success: true };
+}
+
+export async function createBudgetItem(input: {
+  name: string;
+  amount: number;
+  icon: string;
+}) {
+  const { supabase, userId } = await getUserId();
+
+  const { data, error } = await supabase
+    .from("budget_items")
+    .insert({
+      user_id: userId,
+      name: input.name,
+      amount: input.amount,
+      icon: input.icon,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function deleteBudgetItem(itemId: string) {
+  const { supabase, userId } = await getUserId();
+
+  const { error } = await supabase
+    .from("budget_items")
+    .delete()
+    .eq("id", itemId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return { success: true };
+}
+
+
+
+export async function createNutritionGoal(input: {
+  title: string;
+  value: number;
+  unit: string;
+  icon: string;
+  current: number;
+}) {
+  const { supabase, userId } = await getUserId();
+
+  const progress =
+    input.value > 0
+      ? Math.min(Math.round((input.current / input.value) * 100), 100)
+      : 0;
+
+  const { data, error } = await supabase
+    .from("nutrition_goals")
+    .insert({
+      user_id: userId,
+      title: input.title,
+      value: input.value,
+      unit: input.unit,
+      icon: input.icon,
+      current: input.current,
+      progress,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function updateNutritionGoal(
+  goalId: string,
+  input: {
+    title: string;
+    value: number;
+    unit: string;
+    icon: string;
+    current: number;
+  }
+) {
+  const { supabase, userId } = await getUserId();
+
+  const progress =
+    input.value > 0
+      ? Math.min(Math.round((input.current / input.value) * 100), 100)
+      : 0;
+
+  const { data, error } = await supabase
+    .from("nutrition_goals")
+    .update({
+      title: input.title,
+      value: input.value,
+      unit: input.unit,
+      icon: input.icon,
+      current: input.current,
+      progress,
+    })
+    .eq("id", goalId)
+    .eq("user_id", userId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function deleteNutritionGoal(goalId: string) {
+  const { supabase, userId } = await getUserId();
+
+  const { error } = await supabase
+    .from("nutrition_goals")
+    .delete()
+    .eq("id", goalId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return { success: true };
+}
+
+
+
+
+export async function createShoppingItem(input: {
+  food: string;
+  quantity: string;
+  cost: number;
+}) {
+  const { supabase, userId } = await getUserId();
+
+  const { data, error } = await supabase
+    .from("shopping_list")
+    .insert({
+      user_id: userId,
+      food: input.food,
+      quantity: input.quantity,
+      cost: input.cost,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+export async function deleteShoppingItem(itemId: string) {
+  const { supabase, userId } = await getUserId();
+
+  const { error } = await supabase
+    .from("shopping_list")
+    .delete()
+    .eq("id", itemId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 
   return { success: true };
 }

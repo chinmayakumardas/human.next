@@ -40,32 +40,32 @@ navMain: [
     url: "/mind",
     icon: <BrainIcon />,
     items: [
-      { title: "Dashboard", url: "/mind" },
+      { title: "goal", url: "/mind" },
       { title: "Books", url: "/mind/book" },
       { title: "Habits", url: "/mind/habits" },
     ],
   },
  
-  {
-    title: "Money",
-    url: "/wealth",
-    icon: <WalletIcon />,
-    items: [
-      { title: "Dashboard", url: "/wealth" },
-      { title: "Income", url: "/wealth/income" },
-      { title: "Expenses", url: "/wealth/expenses" },
-      { title: "Budget", url: "/wealth/budget" },
-      { title: "Loans & EMI", url: "/wealth/loans" },
+  // {
+  //   title: "Money",
+  //   url: "/wealth",
+  //   icon: <WalletIcon />,
+  //   items: [
+  //     { title: "goal", url: "/wealth" },
+  //     { title: "Income", url: "/wealth/income" },
+  //     { title: "Expenses", url: "/wealth/expenses" },
+  //     { title: "Budget", url: "/wealth/budget" },
+  //     { title: "Loans & EMI", url: "/wealth/loans" },
       
-    ],
-  },
+  //   ],
+  // },
 
  {
     title: "Muscles",
     url: "/muscle",
     icon: <HeartPulseIcon />,
     items: [
-      { title: "Dashboard", url: "/muscle" },
+      { title: "goal", url: "/muscle" },
       { title: "Exercise", url: "/muscle/exercise" },
       { title: "Diet & Nutrition", url: "/muscle/diet" },
      
@@ -73,14 +73,7 @@ navMain: [
   },
 ],
   single: [
-    {
-      name: "Dashboard",
-      url: "/dashboard",
-      icon: (
-        <FrameIcon
-        />
-      ),
-    },
+    
     {
       name: "goals",
       url: "/goal",

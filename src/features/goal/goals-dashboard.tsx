@@ -317,7 +317,7 @@ export function GoalsDashboard() {
             return (
               <Card key={goal.id} className="rounded-xl border shadow-sm">
                 <CardContent className="p-0">
-                  <Accordion type="single" collapsible>
+                  <Accordion  >
                     <AccordionItem value={goal.id} className="border-0">
                       <div className="flex items-start gap-3 p-4 pb-0">
                         <div
