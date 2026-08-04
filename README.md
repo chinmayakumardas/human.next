@@ -34,3 +34,18 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+src/features/diet/
+├── constants.ts          # nutritionGoals, mealPlan, shoppingList, budgetItems (or move later to DB)
+├── diet-actions.ts       # Server actions / Supabase queries (create, update, fetch)
+├── diet-planner.tsx      # Main UI component (your current page code)
+├── schema.sql            # Tables for nutrition_goals, meals, meal_foods, shopping_list, budget_items
+├── types.ts              # TypeScript interfaces
+└── components/           # (optional, if you want to split)
+    ├── nutrition-goals.tsx
+    ├── meal-plan.tsx
+    ├── daily-summary.tsx
+    ├── shopping-list.tsx
+    └── monthly-budget.tsx

@@ -62,12 +62,12 @@ navMain: [
 
  {
     title: "Muscles",
-    url: "/health",
+    url: "/muscle",
     icon: <HeartPulseIcon />,
     items: [
-      { title: "Dashboard", url: "/health" },
-      { title: "Exercise", url: "/health/exercise" },
-      { title: "Diet & Nutrition", url: "/health/diet" },
+      { title: "Dashboard", url: "/muscle" },
+      { title: "Exercise", url: "/muscle/exercise" },
+      { title: "Diet & Nutrition", url: "/muscle/diet" },
      
     ],
   },
